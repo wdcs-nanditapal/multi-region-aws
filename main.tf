@@ -13,11 +13,16 @@ terraform {
     profile                 = "chatwit"
   }
 }
+# Define the data source to get a list of available AZs
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 
 resource "aws_instance" "example" {
   ami           = var.ami_id[var.region]      
-  #ami = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
+  availability_zone = element(data.aws_availability_zones.available.names, count.index % length(data.aws_availability_zones.available.names))
+  count = 5
   tags = {
     Name = "multi-region"
   }
